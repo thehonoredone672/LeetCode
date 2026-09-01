@@ -1,0 +1,47 @@
+class Solution {
+
+    public int maxAncestorDiff(TreeNode root) {
+
+        return dfs(root, root.val, root.val);
+    }
+
+    private int dfs(
+        TreeNode node,
+        int minValue,
+        int maxValue
+    ) {
+
+        if (node == null) {
+            return 0;
+        }
+
+        // Difference between current node
+        // and the extreme ancestor values
+        int currentDiff = Math.max(
+            Math.abs(node.val - minValue),
+            Math.abs(node.val - maxValue)
+        );
+
+        // Update minimum and maximum
+        minValue = Math.min(minValue, node.val);
+        maxValue = Math.max(maxValue, node.val);
+
+        // Search both subtrees
+        int leftDiff = dfs(
+            node.left,
+            minValue,
+            maxValue
+        );
+
+        int rightDiff = dfs(
+            node.right,
+            minValue,
+            maxValue
+        );
+
+        return Math.max(
+            currentDiff,
+            Math.max(leftDiff, rightDiff)
+        );
+    }
+}
