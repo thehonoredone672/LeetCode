@@ -1,0 +1,52 @@
+import java.util.HashMap;
+import java.util.Map;
+
+class Solution {
+
+    private Map<Long, Integer> prefixMap = new HashMap<>();
+    private int target;
+
+    public int pathSum(TreeNode root, int targetSum) {
+
+        target = targetSum;
+
+        // Prefix sum 0 exists before starting
+        prefixMap.put(0L, 1);
+
+        return dfs(root, 0L);
+    }
+
+    private int dfs(TreeNode node, long currentSum) {
+
+        if (node == null) {
+            return 0;
+        }
+
+        // Add current node value
+        currentSum += node.val;
+
+        // Number of valid paths ending at current node
+        int count = prefixMap.getOrDefault(
+            currentSum - target,
+            0
+        );
+
+        // Store current prefix sum
+        prefixMap.put(
+            currentSum,
+            prefixMap.getOrDefault(currentSum, 0) + 1
+        );
+
+        // Explore children
+        count += dfs(node.left, currentSum);
+        count += dfs(node.right, currentSum);
+
+        // Backtracking: remove current prefix sum
+        prefixMap.put(
+            currentSum,
+            prefixMap.get(currentSum) - 1
+        );
+
+        return count;
+    }
+}
