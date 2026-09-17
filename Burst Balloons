@@ -1,0 +1,49 @@
+class Solution {
+
+    public int maxCoins(int[] nums) {
+
+        int n = nums.length;
+
+        // Add boundary balloons
+        int[] arr = new int[n + 2];
+
+        arr[0] = 1;
+        arr[n + 1] = 1;
+
+        for (int i = 0; i < n; i++) {
+            arr[i + 1] = nums[i];
+        }
+
+        // dp[left][right] =
+        // maximum coins from bursting balloons
+        // between left and right
+        int[][] dp = new int[n + 2][n + 2];
+
+        // length is the distance between boundaries
+        for (int length = 2; length <= n + 1; length++) {
+
+            for (int left = 0;
+                 left + length <= n + 1;
+                 left++) {
+
+                int right = left + length;
+
+                // Try every balloon as the last balloon
+                for (int k = left + 1;
+                     k < right;
+                     k++) {
+
+                    int coins =
+                        dp[left][k]
+                        + dp[k][right]
+                        + arr[left] * arr[k] * arr[right];
+
+                    dp[left][right] =
+                        Math.max(dp[left][right], coins);
+                }
+            }
+        }
+
+        return dp[0][n + 1];
+    }
+}
