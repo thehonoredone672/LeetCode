@@ -1,0 +1,106 @@
+class Solution {
+
+    private String s1;
+    private String s2;
+    private Boolean[][][] memo;
+
+    public boolean isScramble(String s1, String s2) {
+
+        if (s1.length() != s2.length()) {
+            return false;
+        }
+
+        this.s1 = s1;
+        this.s2 = s2;
+
+        int n = s1.length();
+
+        memo = new Boolean[n][n][n + 1];
+
+        return solve(0, 0, n);
+    }
+
+    private boolean solve(int start1, int start2, int length) {
+
+        // Already calculated
+        if (memo[start1][start2][length] != null) {
+            return memo[start1][start2][length];
+        }
+
+        // Same substring
+        boolean same = true;
+
+        for (int i = 0; i < length; i++) {
+
+            if (s1.charAt(start1 + i)
+                    != s2.charAt(start2 + i)) {
+
+                same = false;
+                break;
+            }
+        }
+
+        if (same) {
+            return memo[start1][start2][length] = true;
+        }
+
+        // Check character frequencies
+        int[] count = new int[26];
+
+        for (int i = 0; i < length; i++) {
+
+            count[s1.charAt(start1 + i) - 'a']++;
+
+            count[s2.charAt(start2 + i) - 'a']--;
+        }
+
+        for (int value : count) {
+
+            if (value != 0) {
+                return memo[start1][start2][length] = false;
+            }
+        }
+
+        // Try every possible split
+        for (int split = 1; split < length; split++) {
+
+            // Case 1: No swap
+            boolean noSwap =
+                solve(
+                    start1,
+                    start2,
+                    split
+                )
+                &&
+                solve(
+                    start1 + split,
+                    start2 + split,
+                    length - split
+                );
+
+            if (noSwap) {
+                return memo[start1][start2][length] = true;
+            }
+
+            // Case 2: Swap
+            boolean swap =
+                solve(
+                    start1,
+                    start2 + length - split,
+                    split
+                )
+                &&
+                solve(
+                    start1 + split,
+                    start2,
+                    length - split
+                );
+
+            if (swap) {
+                return memo[start1][start2][length] = true;
+            }
+        }
+
+        return memo[start1][start2][length] = false;
+    }
+}
