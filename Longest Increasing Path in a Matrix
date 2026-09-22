@@ -1,0 +1,77 @@
+class Solution {
+
+    private int[][] matrix;
+    private int[][] memo;
+
+    private int rows;
+    private int cols;
+
+    private final int[] dr = {-1, 1, 0, 0};
+    private final int[] dc = {0, 0, -1, 1};
+
+    public int longestIncreasingPath(int[][] matrix) {
+
+        if (matrix == null ||
+            matrix.length == 0 ||
+            matrix[0].length == 0) {
+            return 0;
+        }
+
+        this.matrix = matrix;
+        this.rows = matrix.length;
+        this.cols = matrix[0].length;
+
+        memo = new int[rows][cols];
+
+        int answer = 0;
+
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
+
+                answer = Math.max(
+                    answer,
+                    dfs(r, c)
+                );
+            }
+        }
+
+        return answer;
+    }
+
+    private int dfs(int r, int c) {
+
+        // Already calculated
+        if (memo[r][c] != 0) {
+            return memo[r][c];
+        }
+
+        // The cell itself counts as length 1
+        int best = 1;
+
+        // Try all 4 directions
+        for (int direction = 0; direction < 4; direction++) {
+
+            int nr = r + dr[direction];
+            int nc = c + dc[direction];
+
+            // Check boundaries
+            if (nr < 0 || nr >= rows ||
+                nc < 0 || nc >= cols) {
+                continue;
+            }
+
+            // Only move to a strictly larger value
+            if (matrix[nr][nc] > matrix[r][c]) {
+
+                int pathLength = 1 + dfs(nr, nc);
+
+                best = Math.max(best, pathLength);
+            }
+        }
+
+        // Save result
+        memo[r][c] = best;
+
+        return best;
+    }
+}
