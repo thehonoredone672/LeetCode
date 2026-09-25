@@ -1,0 +1,140 @@
+import java.util.*;
+
+class Solution {
+
+    private static class TrieNode {
+
+        TrieNode[] children = new TrieNode[26];
+
+        String word;
+    }
+
+    private final int[] dr = {-1, 1, 0, 0};
+    private final int[] dc = {0, 0, -1, 1};
+
+    private int rows;
+    private int cols;
+
+    public List<String> findWords(
+            char[][] board,
+            String[] words) {
+
+        List<String> result = new ArrayList<>();
+
+        if (board == null ||
+            board.length == 0 ||
+            words == null ||
+            words.length == 0) {
+
+            return result;
+        }
+
+        rows = board.length;
+        cols = board[0].length;
+
+        // Build Trie
+        TrieNode root = new TrieNode();
+
+        for (String word : words) {
+            insert(root, word);
+        }
+
+        // Start DFS from every cell
+        for (int row = 0; row < rows; row++) {
+            for (int col = 0; col < cols; col++) {
+
+                dfs(
+                    board,
+                    row,
+                    col,
+                    root,
+                    result
+                );
+            }
+        }
+
+        return result;
+    }
+
+    private void insert(
+            TrieNode root,
+            String word) {
+
+        TrieNode current = root;
+
+        for (char ch : word.toCharArray()) {
+
+            int index = ch - 'a';
+
+            if (current.children[index] == null) {
+                current.children[index] = new TrieNode();
+            }
+
+            current = current.children[index];
+        }
+
+        current.word = word;
+    }
+
+    private void dfs(
+            char[][] board,
+            int row,
+            int col,
+            TrieNode parent,
+            List<String> result) {
+
+        char ch = board[row][col];
+
+        // Already visited
+        if (ch == '#') {
+            return;
+        }
+
+        int index = ch - 'a';
+
+        TrieNode current = parent.children[index];
+
+        // Character doesn't continue any Trie prefix
+        if (current == null) {
+            return;
+        }
+
+        // Found a complete word
+        if (current.word != null) {
+
+            result.add(current.word);
+
+            // Prevent duplicates
+            current.word = null;
+        }
+
+        // Mark current cell as visited
+        board[row][col] = '#';
+
+        // Explore four directions
+        for (int direction = 0;
+             direction < 4;
+             direction++) {
+
+            int nr = row + dr[direction];
+            int nc = col + dc[direction];
+
+            if (nr < 0 || nr >= rows ||
+                nc < 0 || nc >= cols) {
+
+                continue;
+            }
+
+            dfs(
+                board,
+                nr,
+                nc,
+                current,
+                result
+            );
+        }
+
+        // Backtrack
+        board[row][col] = ch;
+    }
+}
