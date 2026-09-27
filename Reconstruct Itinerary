@@ -1,0 +1,53 @@
+import java.util.*;
+
+class Solution {
+
+    private Map<String, PriorityQueue<String>> graph;
+    private LinkedList<String> route;
+
+    public List<String> findItinerary(
+            List<List<String>> tickets) {
+
+        graph = new HashMap<>();
+        route = new LinkedList<>();
+
+        // Build graph
+        for (List<String> ticket : tickets) {
+
+            String from = ticket.get(0);
+            String to = ticket.get(1);
+
+            graph
+                .computeIfAbsent(
+                    from,
+                    key -> new PriorityQueue<>()
+                )
+                .offer(to);
+        }
+
+        // Start from JFK
+        dfs("JFK");
+
+        // DFS builds the route backwards
+        Collections.reverse(route);
+
+        return route;
+    }
+
+    private void dfs(String airport) {
+
+        PriorityQueue<String> destinations =
+            graph.get(airport);
+
+        while (destinations != null &&
+               !destinations.isEmpty()) {
+
+            String next = destinations.poll();
+
+            dfs(next);
+        }
+
+        // Add after using all outgoing tickets
+        route.addFirst(airport);
+    }
+}
