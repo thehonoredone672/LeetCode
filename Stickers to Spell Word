@@ -1,0 +1,105 @@
+import java.util.*;
+
+class Solution {
+
+    private Map<String, Integer> memo;
+    private int[][] stickerCounts;
+
+    public int minStickers(String[] stickers, String target) {
+
+        memo = new HashMap<>();
+
+        // Base case:
+        // No characters remaining.
+        memo.put("", 0);
+
+        stickerCounts = new int[stickers.length][26];
+
+        // Convert stickers into frequency arrays
+        for (int i = 0; i < stickers.length; i++) {
+
+            for (char ch : stickers[i].toCharArray()) {
+                stickerCounts[i][ch - 'a']++;
+            }
+        }
+
+        int answer = dfs(target);
+
+        return answer == Integer.MAX_VALUE ? -1 : answer;
+    }
+
+    private int dfs(String target) {
+
+        // Already solved
+        if (memo.containsKey(target)) {
+            return memo.get(target);
+        }
+
+        int answer = Integer.MAX_VALUE;
+
+        // Use the first character as a branching filter
+        int firstChar = target.charAt(0) - 'a';
+
+        for (int[] sticker : stickerCounts) {
+
+            // If this sticker cannot provide
+            // the first required character,
+            // skip it.
+            if (sticker[firstChar] == 0) {
+                continue;
+            }
+
+            // Count characters in target
+            int[] remainingCount = new int[26];
+
+            for (char ch : target.toCharArray()) {
+                remainingCount[ch - 'a']++;
+            }
+
+            // Use this sticker
+            for (int i = 0; i < 26; i++) {
+                remainingCount[i] =
+                    Math.max(
+                        0,
+                        remainingCount[i] - sticker[i]
+                    );
+            }
+
+            // Build remaining target
+            StringBuilder nextTarget = new StringBuilder();
+
+            for (int i = 0; i < 26; i++) {
+
+                for (int count = 0;
+                     count < remainingCount[i];
+                     count++) {
+
+                    nextTarget.append(
+                        (char) ('a' + i)
+                    );
+                }
+            }
+
+            String next = nextTarget.toString();
+
+            // If the sticker made no progress,
+            // skip it.
+            if (next.equals(target)) {
+                continue;
+            }
+
+            int result = dfs(next);
+
+            if (result != Integer.MAX_VALUE) {
+                answer = Math.min(
+                    answer,
+                    1 + result
+                );
+            }
+        }
+
+        memo.put(target, answer);
+
+        return answer;
+    }
+}
