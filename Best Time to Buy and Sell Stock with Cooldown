@@ -1,0 +1,41 @@
+class Solution {
+    public int maxProfit(int[] prices) {
+        int n = prices.length;
+
+        if (n == 0) {
+            return 0;
+        }
+
+        // Maximum profit when holding a stock
+        int hold = -prices[0];
+
+        // Maximum profit on the day we just sold
+        int sold = 0;
+
+        // Maximum profit while resting
+        int rest = 0;
+
+        for (int i = 1; i < n; i++) {
+            int previousHold = hold;
+            int previousSold = sold;
+            int previousRest = rest;
+
+            // Either keep holding or buy today
+            hold = Math.max(
+                previousHold,
+                previousRest - prices[i]
+            );
+
+            // Sell the stock today
+            sold = previousHold + prices[i];
+
+            // Either keep resting or finish cooldown
+            rest = Math.max(
+                previousRest,
+                previousSold
+            );
+        }
+
+        return Math.max(sold, rest);
+    }
+}
