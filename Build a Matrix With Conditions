@@ -1,0 +1,89 @@
+import java.util.*;
+
+class Solution {
+
+    public int[][] buildMatrix(
+        int k,
+        int[][] rowConditions,
+        int[][] colConditions
+    ) {
+        // Find a valid ordering for rows and columns
+        int[] rowOrder = topologicalSort(k, rowConditions);
+        int[] colOrder = topologicalSort(k, colConditions);
+
+        // A cycle exists in at least one graph
+        if (rowOrder == null || colOrder == null) {
+            return new int[0][0];
+        }
+
+        // Store the row and column position of each number
+        int[] rowPosition = new int[k + 1];
+        int[] colPosition = new int[k + 1];
+
+        for (int i = 0; i < k; i++) {
+            rowPosition[rowOrder[i]] = i;
+            colPosition[colOrder[i]] = i;
+        }
+
+        // Build the matrix
+        int[][] matrix = new int[k][k];
+
+        for (int num = 1; num <= k; num++) {
+            matrix[rowPosition[num]][colPosition[num]] = num;
+        }
+
+        return matrix;
+    }
+
+    private int[] topologicalSort(int k, int[][] conditions) {
+        List<List<Integer>> graph = new ArrayList<>();
+
+        for (int i = 0; i <= k; i++) {
+            graph.add(new ArrayList<>());
+        }
+
+        int[] indegree = new int[k + 1];
+
+        // Build the directed graph
+        for (int[] condition : conditions) {
+            int from = condition[0];
+            int to = condition[1];
+
+            graph.get(from).add(to);
+            indegree[to]++;
+        }
+
+        // Add all nodes with indegree zero
+        Queue<Integer> queue = new ArrayDeque<>();
+
+        for (int num = 1; num <= k; num++) {
+            if (indegree[num] == 0) {
+                queue.offer(num);
+            }
+        }
+
+        int[] order = new int[k];
+        int index = 0;
+
+        // Kahn's algorithm
+        while (!queue.isEmpty()) {
+            int current = queue.poll();
+            order[index++] = current;
+
+            for (int neighbor : graph.get(current)) {
+                indegree[neighbor]--;
+
+                if (indegree[neighbor] == 0) {
+                    queue.offer(neighbor);
+                }
+            }
+        }
+
+        // Not all nodes were processed: there is a cycle
+        if (index != k) {
+            return null;
+        }
+
+        return order;
+    }
+}
