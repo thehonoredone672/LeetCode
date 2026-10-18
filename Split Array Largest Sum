@@ -1,0 +1,46 @@
+class Solution {
+    public int splitArray(int[] nums, int k) {
+        int left = 0;
+        long right = 0;
+
+        // Minimum possible limit and maximum possible limit
+        for (int num : nums) {
+            left = Math.max(left, num);
+            right += num;
+        }
+
+        while (left < right) {
+            int mid = (int) (left + (right - left) / 2);
+
+            if (canSplit(nums, k, mid)) {
+                // This limit works. Try a smaller one.
+                right = mid;
+            } else {
+                // This limit is too small.
+                left = mid + 1;
+            }
+        }
+
+        return left;
+    }
+
+    private boolean canSplit(int[] nums, int k, int limit) {
+        int subarrays = 1;
+        long currentSum = 0;
+
+        for (int num : nums) {
+            if (currentSum + num > limit) {
+                subarrays++;
+                currentSum = num;
+
+                if (subarrays > k) {
+                    return false;
+                }
+            } else {
+                currentSum += num;
+            }
+        }
+
+        return true;
+    }
+}
