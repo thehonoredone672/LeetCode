@@ -1,0 +1,60 @@
+import java.util.*;
+
+class Solution {
+    public int[] smallestRange(List<List<Integer>> nums) {
+        int k = nums.size();
+
+        // Heap entry: [value, listIndex, elementIndex]
+        PriorityQueue<int[]> minHeap = new PriorityQueue<>(
+            (a, b) -> Integer.compare(a[0], b[0])
+        );
+
+        int currentMax = Integer.MIN_VALUE;
+
+        // Start with the first element from each list
+        for (int i = 0; i < k; i++) {
+            int value = nums.get(i).get(0);
+
+            minHeap.offer(new int[]{value, i, 0});
+            currentMax = Math.max(currentMax, value);
+        }
+
+        int bestLeft = minHeap.peek()[0];
+        int bestRight = currentMax;
+
+        while (true) {
+            int[] smallest = minHeap.poll();
+
+            int currentMin = smallest[0];
+            int listIndex = smallest[1];
+            int elementIndex = smallest[2];
+
+            // Update the best range
+            long currentWidth = (long) currentMax - currentMin;
+            long bestWidth = (long) bestRight - bestLeft;
+
+            if (currentWidth < bestWidth ||
+                (currentWidth == bestWidth && currentMin < bestLeft)) {
+                bestLeft = currentMin;
+                bestRight = currentMax;
+            }
+
+            // Cannot continue if this list has no more elements
+            if (elementIndex + 1 >= nums.get(listIndex).size()) {
+                break;
+            }
+
+            // Advance the list that provided the minimum
+            int nextIndex = elementIndex + 1;
+            int nextValue = nums.get(listIndex).get(nextIndex);
+
+            minHeap.offer(new int[]{
+                nextValue, listIndex, nextIndex
+            });
+
+            currentMax = Math.max(currentMax, nextValue);
+        }
+
+        return new int[]{bestLeft, bestRight};
+    }
+}
