@@ -1,0 +1,124 @@
+import java.util.*;
+
+class Solution {
+    private PriorityQueue<Integer> small; // Max heap
+    private PriorityQueue<Integer> large; // Min heap
+    private Map<Integer, Integer> delayed;
+
+    private int smallSize;
+    private int largeSize;
+
+    public double[] medianSlidingWindow(int[] nums, int k) {
+        int n = nums.length;
+        double[] result = new double[n - k + 1];
+
+        small = new PriorityQueue<>(Collections.reverseOrder());
+        large = new PriorityQueue<>();
+        delayed = new HashMap<>();
+
+        smallSize = 0;
+        largeSize = 0;
+
+        // Build the first window
+        for (int i = 0; i < k; i++) {
+            addNum(nums[i]);
+        }
+
+        result[0] = getMedian(k);
+
+        // Slide the window
+        for (int i = k; i < n; i++) {
+            int outgoing = nums[i - k];
+            int incoming = nums[i];
+
+            removeNum(outgoing);
+            addNum(incoming);
+
+            result[i - k + 1] = getMedian(k);
+        }
+
+        return result;
+    }
+
+    private void addNum(int num) {
+        prune(small);
+
+        if (smallSize == 0 || num <= small.peek()) {
+            small.offer(num);
+            smallSize++;
+        } else {
+            large.offer(num);
+            largeSize++;
+        }
+
+        rebalance();
+    }
+
+    private void removeNum(int num) {
+        delayed.put(num, delayed.getOrDefault(num, 0) + 1);
+
+        prune(small);
+        prune(large);
+
+        if (!small.isEmpty() && num <= small.peek()) {
+            smallSize--;
+
+            if (num == small.peek()) {
+                prune(small);
+            }
+        } else {
+            largeSize--;
+
+            if (!large.isEmpty() && num == large.peek()) {
+                prune(large);
+            }
+        }
+
+        rebalance();
+    }
+
+    private void rebalance() {
+        // Lower half may contain at most one extra element
+        if (smallSize > largeSize + 1) {
+            large.offer(small.poll());
+            smallSize--;
+            largeSize++;
+            prune(small);
+        } else if (smallSize < largeSize) {
+            small.offer(large.poll());
+            smallSize++;
+            largeSize--;
+            prune(large);
+        }
+    }
+
+    private void prune(PriorityQueue<Integer> heap) {
+        while (!heap.isEmpty()) {
+            int num = heap.peek();
+            int count = delayed.getOrDefault(num, 0);
+
+            if (count == 0) {
+                break;
+            }
+
+            heap.poll();
+
+            if (count == 1) {
+                delayed.remove(num);
+            } else {
+                delayed.put(num, count - 1);
+            }
+        }
+    }
+
+    private double getMedian(int k) {
+        prune(small);
+        prune(large);
+
+        if (k % 2 == 1) {
+            return small.peek();
+        }
+
+        return ((long) small.peek() + large.peek()) / 2.0;
+    }
+}
