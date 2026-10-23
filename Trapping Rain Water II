@@ -1,0 +1,104 @@
+import java.util.*;
+
+class Solution {
+
+    private static final int[][] DIRECTIONS = {
+        {-1, 0},
+        {1, 0},
+        {0, -1},
+        {0, 1}
+    };
+
+    public int trapRainWater(int[][] heightMap) {
+        int m = heightMap.length;
+        int n = heightMap[0].length;
+
+        // A boundary-only map cannot trap water.
+        if (m < 3 || n < 3) {
+            return 0;
+        }
+
+        // Each entry: [effectiveHeight, row, column]
+        PriorityQueue<int[]> minHeap = new PriorityQueue<>(
+            (a, b) -> Integer.compare(a[0], b[0])
+        );
+
+        boolean[][] visited = new boolean[m][n];
+
+        // Add top and bottom boundaries.
+        for (int col = 0; col < n; col++) {
+            addBoundary(heightMap, visited, minHeap, 0, col);
+            addBoundary(heightMap, visited, minHeap, m - 1, col);
+        }
+
+        // Add left and right boundaries.
+        for (int row = 0; row < m; row++) {
+            addBoundary(heightMap, visited, minHeap, row, 0);
+            addBoundary(heightMap, visited, minHeap, row, n - 1);
+        }
+
+        int water = 0;
+
+        while (!minHeap.isEmpty()) {
+            int[] cell = minHeap.poll();
+
+            int boundaryHeight = cell[0];
+            int row = cell[1];
+            int col = cell[2];
+
+            for (int[] direction : DIRECTIONS) {
+                int nr = row + direction[0];
+                int nc = col + direction[1];
+
+                // Ignore cells outside the map.
+                if (nr < 0 || nr >= m || nc < 0 || nc >= n) {
+                    continue;
+                }
+
+                // Process each cell only once.
+                if (visited[nr][nc]) {
+                    continue;
+                }
+
+                visited[nr][nc] = true;
+
+                int neighborHeight = heightMap[nr][nc];
+
+                // Water trapped above this neighbor.
+                if (neighborHeight < boundaryHeight) {
+                    water += boundaryHeight - neighborHeight;
+                }
+
+                // Carry the effective boundary height inward.
+                int effectiveHeight = Math.max(
+                    boundaryHeight,
+                    neighborHeight
+                );
+
+                minHeap.offer(new int[]{
+                    effectiveHeight, nr, nc
+                });
+            }
+        }
+
+        return water;
+    }
+
+    private void addBoundary(
+        int[][] heightMap,
+        boolean[][] visited,
+        PriorityQueue<int[]> minHeap,
+        int row,
+        int col
+    ) {
+        if (!visited[row][col]) {
+            visited[row][col] = true;
+
+            minHeap.offer(new int[]{
+                heightMap[row][col],
+                row,
+                col
+            });
+        }
+    }
+}
