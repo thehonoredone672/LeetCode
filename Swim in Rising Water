@@ -1,0 +1,67 @@
+import java.util.Arrays;
+import java.util.PriorityQueue;
+
+class Solution {
+public int swimInWater(int[][] grid) {
+int n = grid.length;
+
+    int[][] dist = new int[n][n];
+    for (int[] row : dist) {
+        Arrays.fill(row, Integer.MAX_VALUE);
+    }
+
+    // Each entry: {requiredTime, row, column}
+    PriorityQueue<int[]> pq = new PriorityQueue<>(
+        (a, b) -> Integer.compare(a[0], b[0])
+    );
+
+    dist[0][0] = grid[0][0];
+    pq.offer(new int[]{grid[0][0], 0, 0});
+
+    int[][] directions = {
+        {-1, 0}, {1, 0}, {0, -1}, {0, 1}
+    };
+
+    while (!pq.isEmpty()) {
+        int[] current = pq.poll();
+
+        int time = current[0];
+        int row = current[1];
+        int col = current[2];
+
+        // Ignore outdated heap entries
+        if (time != dist[row][col]) {
+            continue;
+        }
+
+        // Destination reached optimally
+        if (row == n - 1 && col == n - 1) {
+            return time;
+        }
+
+        for (int[] dir : directions) {
+            int nr = row + dir[0];
+            int nc = col + dir[1];
+
+            if (nr < 0 || nr >= n ||
+                nc < 0 || nc >= n) {
+                continue;
+            }
+
+            int nextTime = Math.max(
+                time, grid[nr][nc]
+            );
+
+            if (nextTime < dist[nr][nc]) {
+                dist[nr][nc] = nextTime;
+                pq.offer(new int[]{
+                    nextTime, nr, nc
+                });
+            }
+        }
+    }
+
+    return -1;
+}
+
+}
