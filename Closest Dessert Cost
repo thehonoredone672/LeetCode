@@ -1,0 +1,40 @@
+class Solution {
+    public int closestCost(int[] baseCosts, int[] toppingCosts, int target) {
+        boolean[] possible = new boolean[20001];
+
+        for (int base : baseCosts) {
+            possible[base] = true;
+        }
+
+        for (int topping : toppingCosts) {
+            for (int cost = 20000; cost >= 0; cost--) {
+                if (possible[cost]) {
+                    if (cost + topping <= 20000) {
+                        possible[cost + topping] = true;
+                    }
+
+                    if (cost + 2 * topping <= 20000) {
+                        possible[cost + 2 * topping] = true;
+                    }
+                }
+            }
+        }
+
+        int answer = Integer.MAX_VALUE;
+
+        for (int cost = 0; cost <= 20000; cost++) {
+            if (possible[cost]) {
+                if (Math.abs(cost - target) <
+                    Math.abs(answer - target)) {
+                    answer = cost;
+                } else if (Math.abs(cost - target) ==
+                           Math.abs(answer - target) &&
+                           cost < answer) {
+                    answer = cost;
+                }
+            }
+        }
+
+        return answer;
+    }
+}
