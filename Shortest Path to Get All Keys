@@ -1,0 +1,113 @@
+import java.util.*;
+
+class Solution {
+public int shortestPathAllKeys(String[] grid) {
+int m = grid.length;
+int n = grid[0].length();
+
+    int startRow = 0;
+    int startCol = 0;
+    int keyCount = 0;
+
+    // Find starting position and number of keys
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++) {
+            char ch = grid[i].charAt(j);
+
+            if (ch == '@') {
+                startRow = i;
+                startCol = j;
+            }
+
+            if (ch >= 'a' && ch <= 'f') {
+                keyCount++;
+            }
+        }
+    }
+
+    if (keyCount == 0) {
+        return 0;
+    }
+
+    int target = (1 << keyCount) - 1;
+
+    // visited[row][col][keyMask]
+    boolean[][][] visited =
+        new boolean[m][n][1 << keyCount];
+
+    Queue<int[]> queue = new LinkedList<>();
+
+    // {row, col, keyMask, steps}
+    queue.offer(new int[]{
+        startRow, startCol, 0, 0
+    });
+
+    visited[startRow][startCol][0] = true;
+
+    int[][] directions = {
+        {-1, 0},
+        {1, 0},
+        {0, -1},
+        {0, 1}
+    };
+
+    while (!queue.isEmpty()) {
+        int[] current = queue.poll();
+
+        int row = current[0];
+        int col = current[1];
+        int mask = current[2];
+        int steps = current[3];
+
+        for (int[] dir : directions) {
+            int nr = row + dir[0];
+            int nc = col + dir[1];
+
+            // Check grid boundaries
+            if (nr < 0 || nr >= m ||
+                nc < 0 || nc >= n) {
+                continue;
+            }
+
+            char cell = grid[nr].charAt(nc);
+
+            // Cannot pass through walls
+            if (cell == '#') {
+                continue;
+            }
+
+            // Check doors
+            if (cell >= 'A' && cell <= 'F') {
+                int doorBit = 1 << (cell - 'A');
+
+                if ((mask & doorBit) == 0) {
+                    continue;
+                }
+            }
+
+            int newMask = mask;
+
+            // Collect keys
+            if (cell >= 'a' && cell <= 'f') {
+                newMask |= 1 << (cell - 'a');
+            }
+
+            // All keys collected
+            if (newMask == target) {
+                return steps + 1;
+            }
+
+            if (!visited[nr][nc][newMask]) {
+                visited[nr][nc][newMask] = true;
+
+                queue.offer(new int[]{
+                    nr, nc, newMask, steps + 1
+                });
+            }
+        }
+    }
+
+    return -1;
+}
+
+}
