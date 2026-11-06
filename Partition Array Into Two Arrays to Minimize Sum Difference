@@ -1,0 +1,89 @@
+import java.util.*;
+
+class Solution {
+    public int minimumDifference(int[] nums) {
+        int n = nums.length / 2;
+
+        List<Integer>[] left = new ArrayList[n + 1];
+        List<Integer>[] right = new ArrayList[n + 1];
+
+        for (int i = 0; i <= n; i++) {
+            left[i] = new ArrayList<>();
+            right[i] = new ArrayList<>();
+        }
+
+        generate(nums, 0, n, 0, 0, left);
+        generate(nums, n, 2 * n, 0, 0, right);
+
+        for (int i = 0; i <= n; i++) {
+            Collections.sort(right[i]);
+        }
+
+        long total = 0;
+        for (int num : nums) {
+            total += num;
+        }
+
+        long answer = Long.MAX_VALUE;
+
+        for (int count = 0; count <= n; count++) {
+            List<Integer> a = left[count];
+            List<Integer> b = right[n - count];
+
+            for (int sumA : a) {
+                long target = total / 2 - sumA;
+
+                int low = 0;
+                int high = b.size();
+
+                while (low < high) {
+                    int mid = low + (high - low) / 2;
+
+                    if (b.get(mid) < target) {
+                        low = mid + 1;
+                    } else {
+                        high = mid;
+                    }
+                }
+
+                if (low < b.size()) {
+                    long selected = (long) sumA + b.get(low);
+                    answer = Math.min(
+                        answer,
+                        Math.abs(total - 2 * selected)
+                    );
+                }
+
+                if (low > 0) {
+                    long selected = (long) sumA + b.get(low - 1);
+                    answer = Math.min(
+                        answer,
+                        Math.abs(total - 2 * selected)
+                    );
+                }
+            }
+        }
+
+        return (int) answer;
+    }
+
+    private void generate(
+        int[] nums,
+        int index,
+        int end,
+        int count,
+        int sum,
+        List<Integer>[] result
+    ) {
+        if (index == end) {
+            result[count].add(sum);
+            return;
+        }
+
+        generate(nums, index + 1, end, count,
+                 sum, result);
+
+        generate(nums, index + 1, end, count + 1,
+                 sum + nums[index], result);
+    }
+}
