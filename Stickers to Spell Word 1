@@ -1,0 +1,53 @@
+import java.util.Arrays;
+
+class Solution {
+    public int minStickers(String[] stickers, String target) {
+        int n = target.length();
+        int totalMasks = 1 << n;
+
+        int[][] stickerCounts = new int[stickers.length][26];
+
+        for (int i = 0; i < stickers.length; i++) {
+            for (char c : stickers[i].toCharArray()) {
+                stickerCounts[i][c - 'a']++;
+            }
+        }
+
+        int[] dp = new int[totalMasks];
+        Arrays.fill(dp, n + 1);
+        dp[0] = 0;
+
+        for (int mask = 0; mask < totalMasks; mask++) {
+            if (dp[mask] == n + 1) {
+                continue;
+            }
+
+            for (int[] sticker : stickerCounts) {
+                int newMask = mask;
+                int[] available = sticker.clone();
+
+                for (int i = 0; i < n; i++) {
+                    if ((newMask & (1 << i)) != 0) {
+                        continue;
+                    }
+
+                    int c = target.charAt(i) - 'a';
+
+                    if (available[c] > 0) {
+                        available[c]--;
+                        newMask |= (1 << i);
+                    }
+                }
+
+                dp[newMask] = Math.min(
+                    dp[newMask],
+                    dp[mask] + 1
+                );
+            }
+        }
+
+        return dp[totalMasks - 1] == n + 1
+            ? -1
+            : dp[totalMasks - 1];
+    }
+}
