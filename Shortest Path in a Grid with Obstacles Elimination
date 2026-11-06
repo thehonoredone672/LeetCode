@@ -1,0 +1,67 @@
+import java.util.*;
+
+class Solution {
+    public int shortestPath(int[][] grid, int k) {
+        int m = grid.length;
+        int n = grid[0].length;
+
+        int[][] best = new int[m][n];
+
+        for (int[] row : best) {
+            Arrays.fill(row, -1);
+        }
+
+        Queue<int[]> queue = new LinkedList<>();
+
+        // {row, col, remaining eliminations, steps}
+        queue.offer(new int[]{0, 0, k, 0});
+
+        best[0][0] = k;
+
+        int[][] directions = {
+            {-1, 0},
+            {1, 0},
+            {0, -1},
+            {0, 1}
+        };
+
+        while (!queue.isEmpty()) {
+            int[] current = queue.poll();
+
+            int row = current[0];
+            int col = current[1];
+            int remaining = current[2];
+            int steps = current[3];
+
+            if (row == m - 1 && col == n - 1) {
+                return steps;
+            }
+
+            for (int[] dir : directions) {
+                int nr = row + dir[0];
+                int nc = col + dir[1];
+
+                if (nr < 0 || nr >= m ||
+                    nc < 0 || nc >= n) {
+                    continue;
+                }
+
+                int nextRemaining =
+                    remaining - grid[nr][nc];
+
+                if (nextRemaining < 0 ||
+                    nextRemaining <= best[nr][nc]) {
+                    continue;
+                }
+
+                best[nr][nc] = nextRemaining;
+
+                queue.offer(new int[]{
+                    nr, nc, nextRemaining, steps + 1
+                });
+            }
+        }
+
+        return -1;
+    }
+}
