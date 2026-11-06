@@ -1,0 +1,40 @@
+class Solution {
+    public int profitableSchemes(
+        int n,
+        int minProfit,
+        int[] group,
+        int[] profit
+    ) {
+        int MOD = 1_000_000_007;
+
+        int[][] dp = new int[n + 1][minProfit + 1];
+
+        dp[0][0] = 1;
+
+        for (int i = 0; i < group.length; i++) {
+            int members = group[i];
+            int gain = profit[i];
+
+            for (int j = n; j >= members; j--) {
+                for (int p = minProfit; p >= 0; p--) {
+                    int newProfit = Math.min(
+                        minProfit, p + gain
+                    );
+
+                    dp[j][newProfit] = (
+                        dp[j][newProfit] +
+                        dp[j - members][p]
+                    ) % MOD;
+                }
+            }
+        }
+
+        int result = 0;
+
+        for (int j = 0; j <= n; j++) {
+            result = (result + dp[j][minProfit]) % MOD;
+        }
+
+        return result;
+    }
+}
