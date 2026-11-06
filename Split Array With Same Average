@@ -1,0 +1,39 @@
+import java.util.HashSet;
+import java.util.Set;
+
+class Solution {
+    public boolean splitArraySameAverage(int[] nums) {
+        int n = nums.length;
+        int total = 0;
+
+        for (int num : nums) {
+            total += num;
+        }
+
+        for (int k = 1; k <= n / 2; k++) {
+            if (total * k % n == 0) {
+                Set<Integer>[] dp = new Set[k + 1];
+
+                for (int i = 0; i <= k; i++) {
+                    dp[i] = new HashSet<>();
+                }
+
+                dp[0].add(0);
+
+                for (int num : nums) {
+                    for (int j = k; j >= 1; j--) {
+                        for (int sum : new HashSet<>(dp[j - 1])) {
+                            dp[j].add(sum + num);
+                        }
+                    }
+                }
+
+                if (dp[k].contains(total * k / n)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+}
