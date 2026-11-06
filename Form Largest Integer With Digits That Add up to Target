@@ -1,0 +1,32 @@
+class Solution {
+    public String largestNumber(int[] cost, int target) {
+        String[] dp = new String[target + 1];
+
+        dp[0] = "";
+
+        for (int t = 1; t <= target; t++) {
+            dp[t] = "#";
+        }
+
+        for (int d = 9; d >= 1; d--) {
+            int c = cost[d - 1];
+
+            for (int t = c; t <= target; t++) {
+                if (dp[t - c].equals("#")) {
+                    continue;
+                }
+
+                String candidate = dp[t - c] + d;
+
+                if (dp[t].equals("#") ||
+                    candidate.length() > dp[t].length() ||
+                    (candidate.length() == dp[t].length() &&
+                     candidate.compareTo(dp[t]) > 0)) {
+                    dp[t] = candidate;
+                }
+            }
+        }
+
+        return dp[target].equals("#") ? "0" : dp[target];
+    }
+}
