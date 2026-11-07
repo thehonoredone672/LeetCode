@@ -1,0 +1,72 @@
+import java.util.*;
+
+class Solution {
+    public double frogPosition(
+        int n,
+        int[][] edges,
+        int t,
+        int target
+    ) {
+        List<Integer>[] graph = new ArrayList[n + 1];
+
+        for (int i = 1; i <= n; i++) {
+            graph[i] = new ArrayList<>();
+        }
+
+        for (int[] edge : edges) {
+            graph[edge[0]].add(edge[1]);
+            graph[edge[1]].add(edge[0]);
+        }
+
+        boolean[] visited = new boolean[n + 1];
+
+        Queue<double[]> queue = new LinkedList<>();
+
+        // {node, remaining time, probability}
+        queue.offer(new double[]{1, t, 1.0});
+        visited[1] = true;
+
+        while (!queue.isEmpty()) {
+            double[] current = queue.poll();
+
+            int node = (int) current[0];
+            int time = (int) current[1];
+            double probability = current[2];
+
+            int children = 0;
+
+            for (int next : graph[node]) {
+                if (!visited[next]) {
+                    children++;
+                }
+            }
+
+            if (node == target) {
+                if (time == 0 || children == 0) {
+                    return probability;
+                }
+                return 0.0;
+            }
+
+            if (time == 0 || children == 0) {
+                continue;
+            }
+
+            double nextProbability = probability / children;
+
+            for (int next : graph[node]) {
+                if (!visited[next]) {
+                    visited[next] = true;
+
+                    queue.offer(new double[]{
+                        next,
+                        time - 1,
+                        nextProbability
+                    });
+                }
+            }
+        }
+
+        return 0.0;
+    }
+}
