@@ -1,0 +1,47 @@
+import java.util.*;
+
+class Solution {
+    public int numOfMinutes(
+        int n,
+        int headID,
+        int[] manager,
+        int[] informTime
+    ) {
+        List<Integer>[] graph = new ArrayList[n];
+
+        for (int i = 0; i < n; i++) {
+            graph[i] = new ArrayList<>();
+        }
+
+        for (int i = 0; i < n; i++) {
+            if (manager[i] != -1) {
+                graph[manager[i]].add(i);
+            }
+        }
+
+        Queue<int[]> queue = new LinkedList<>();
+
+        // {employee, time}
+        queue.offer(new int[]{headID, 0});
+
+        int answer = 0;
+
+        while (!queue.isEmpty()) {
+            int[] current = queue.poll();
+
+            int employee = current[0];
+            int time = current[1];
+
+            answer = Math.max(answer, time);
+
+            for (int subordinate : graph[employee]) {
+                queue.offer(new int[]{
+                    subordinate,
+                    time + informTime[employee]
+                });
+            }
+        }
+
+        return answer;
+    }
+}
