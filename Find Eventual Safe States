@@ -1,0 +1,57 @@
+import java.util.*;
+
+class Solution {
+    public List<Integer> eventualSafeNodes(int[][] graph) {
+        int n = graph.length;
+
+        List<List<Integer>> reverseGraph = new ArrayList<>();
+        int[] outDegree = new int[n];
+
+        for (int i = 0; i < n; i++) {
+            reverseGraph.add(new ArrayList<>());
+        }
+
+        // Build reversed graph
+        for (int i = 0; i < n; i++) {
+            outDegree[i] = graph[i].length;
+
+            for (int neighbor : graph[i]) {
+                reverseGraph.get(neighbor).add(i);
+            }
+        }
+
+        Queue<Integer> queue = new LinkedList<>();
+
+        // Terminal nodes are initially safe
+        for (int i = 0; i < n; i++) {
+            if (outDegree[i] == 0) {
+                queue.offer(i);
+            }
+        }
+
+        boolean[] safe = new boolean[n];
+
+        while (!queue.isEmpty()) {
+            int node = queue.poll();
+            safe[node] = true;
+
+            for (int previous : reverseGraph.get(node)) {
+                outDegree[previous]--;
+
+                if (outDegree[previous] == 0) {
+                    queue.offer(previous);
+                }
+            }
+        }
+
+        List<Integer> result = new ArrayList<>();
+
+        for (int i = 0; i < n; i++) {
+            if (safe[i]) {
+                result.add(i);
+            }
+        }
+
+        return result;
+    }
+}
