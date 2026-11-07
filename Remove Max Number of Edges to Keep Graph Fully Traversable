@@ -1,0 +1,90 @@
+import java.util.*;
+
+class Solution {
+    public int maxNumEdgesToRemove(int n, int[][] edges) {
+        DSU alice = new DSU(n);
+        DSU bob = new DSU(n);
+
+        int used = 0;
+
+        // Process shared edges first
+        for (int[] edge : edges) {
+            if (edge[0] == 3) {
+                boolean a = alice.union(edge[1], edge[2]);
+                boolean b = bob.union(edge[1], edge[2]);
+
+                if (a || b) {
+                    used++;
+                }
+            }
+        }
+
+        // Process Alice-only and Bob-only edges
+        for (int[] edge : edges) {
+            int type = edge[0];
+            int u = edge[1];
+            int v = edge[2];
+
+            if (type == 1) {
+                if (alice.union(u, v)) {
+                    used++;
+                }
+            } else if (type == 2) {
+                if (bob.union(u, v)) {
+                    used++;
+                }
+            }
+        }
+
+        if (alice.components != 1 || bob.components != 1) {
+            return -1;
+        }
+
+        return edges.length - used;
+    }
+
+    static class DSU {
+        int[] parent;
+        int[] rank;
+        int components;
+
+        DSU(int n) {
+            parent = new int[n + 1];
+            rank = new int[n + 1];
+            components = n;
+
+            for (int i = 1; i <= n; i++) {
+                parent[i] = i;
+            }
+        }
+
+        int find(int x) {
+            if (parent[x] != x) {
+                parent[x] = find(parent[x]);
+            }
+
+            return parent[x];
+        }
+
+        boolean union(int a, int b) {
+            int rootA = find(a);
+            int rootB = find(b);
+
+            if (rootA == rootB) {
+                return false;
+            }
+
+            if (rank[rootA] < rank[rootB]) {
+                parent[rootA] = rootB;
+            } else if (rank[rootA] > rank[rootB]) {
+                parent[rootB] = rootA;
+            } else {
+                parent[rootB] = rootA;
+                rank[rootA]++;
+            }
+
+            components--;
+            return true;
+        }
+    }
+}
