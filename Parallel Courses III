@@ -1,0 +1,57 @@
+import java.util.*;
+
+class Solution {
+    public int minimumTime(
+        int n,
+        int[][] relations,
+        int[] time
+    ) {
+        List<Integer>[] graph = new ArrayList[n + 1];
+        int[] indegree = new int[n + 1];
+        int[] completion = new int[n + 1];
+
+        for (int i = 1; i <= n; i++) {
+            graph[i] = new ArrayList<>();
+            completion[i] = time[i - 1];
+        }
+
+        for (int[] relation : relations) {
+            int prev = relation[0];
+            int next = relation[1];
+
+            graph[prev].add(next);
+            indegree[next]++;
+        }
+
+        Queue<Integer> queue = new LinkedList<>();
+
+        for (int i = 1; i <= n; i++) {
+            if (indegree[i] == 0) {
+                queue.offer(i);
+            }
+        }
+
+        int answer = 0;
+
+        while (!queue.isEmpty()) {
+            int course = queue.poll();
+
+            answer = Math.max(answer, completion[course]);
+
+            for (int next : graph[course]) {
+                completion[next] = Math.max(
+                    completion[next],
+                    completion[course] + time[next - 1]
+                );
+
+                indegree[next]--;
+
+                if (indegree[next] == 0) {
+                    queue.offer(next);
+                }
+            }
+        }
+
+        return answer;
+    }
+}
