@@ -1,0 +1,37 @@
+
+class Solution {
+    public int maxSatisfied(int[] customers, int[] grumpy, int minutes) {
+        int satisfied = 0;
+        int extra = 0;
+
+        for (int i = 0; i < customers.length; i++) {
+            if (grumpy[i] == 0) {
+                satisfied += customers[i];
+            }
+        }
+
+        int currentExtra = 0;
+
+        for (int i = 0; i < minutes; i++) {
+            if (grumpy[i] == 1) {
+                currentExtra += customers[i];
+            }
+        }
+
+        extra = currentExtra;
+
+        for (int i = minutes; i < customers.length; i++) {
+            if (grumpy[i] == 1) {
+                currentExtra += customers[i];
+            }
+
+            if (grumpy[i - minutes] == 1) {
+                currentExtra -= customers[i - minutes];
+            }
+
+            extra = Math.max(extra, currentExtra);
+        }
+
+        return satisfied + extra;
+    }
+}
